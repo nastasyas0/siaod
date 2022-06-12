@@ -1,0 +1,93 @@
+//Дано множество из n точек на плоскости. Найти вертикальную медиану этого множества точек на плоскости
+//в предположении, что никакие две точки не лежат на одной прямой.
+//Медианой множества точек на плоскости назовем прямую, которая делит множество на два подмножества одинаковой мощности.
+
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+using namespace std;
+
+void input_vector(vector<vector<int>>& Vec, vector<int>& vec, int n) {
+	cout << "Введите координаты точек х и у без запятых через пробел" << endl;
+	int x;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < 2; j++) {
+			cin >> x;
+			Vec[i].push_back(x);
+			if (j == 0) {
+				vec[i] = Vec[i][j];
+			}
+		}
+	}
+}
+
+void input_vector_random(vector<vector<int>>& Vec, vector<int>& vec, int n) {
+	srand(time(NULL));
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < 2; j++) {
+			Vec[i].push_back(rand() % 1000);
+			if (j == 0) {
+				vec[i] = Vec[i][j];
+			}
+		}
+	}
+}
+
+void output_vector(vector<vector<int>> Vec) {
+	cout << endl;
+	cout << "Ваши введенные точки: " << endl;
+	for (int i = 0; i < Vec.size(); i++) {
+		cout << "( ";
+		for (int j = 0; j < 2; j++) {
+			cout << Vec[i][j] << " ";
+		}
+		cout << ")" << endl;
+	}
+	cout << endl;
+}
+
+void sort_vec(vector<int>& vec) {
+	sort(vec.begin(), vec.end());
+}
+
+void output_mediana(vector<int>& vec) {
+	cout << "Медиана вашего множества точек: ";
+	cout << vec[(vec.size() / 2) - 1] << " < x < " << vec[vec.size() / 2] << endl;
+}
+
+int main() {
+	setlocale(LC_ALL, "Rus");
+	int n, ind;
+	cout << "Введите количество точек множества на плоскости: ";
+	cin >> n;
+
+	if (n % 2 != 0 || n < 2) {
+		cout << "Медиану провести невозможно";
+	}
+	else {
+		vector<vector<int>> vec(n);
+		vector<int> vecX(n);
+
+		cout << "Выберете способ заполнения значений точек множества" << endl;
+		cout << "Выберете 1, если хотите заполнить значения точек самостоятельно" << endl;
+		cout << "Выберете 2, если хотите заполнить значения точек рандомными числами" << endl;
+		cin >> ind;
+		switch (ind) {
+		case 1:
+			input_vector(vec, vecX, n);
+			break;
+		case 2:
+			input_vector_random(vec, vecX, n);
+			break;
+		default:
+			cout << "Введен некорректный способ заполнения матрицы";
+			break;
+		}
+		output_vector(vec);
+		sort_vec(vecX);
+		output_mediana(vecX);
+	}
+	return 0;
+}
