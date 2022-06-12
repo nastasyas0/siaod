@@ -1,0 +1,186 @@
+//Разработка тестовых вопросов. Структура записи вопроса: номер темы, текст вопроса, балл за правильный ответ,
+//список вариантов ответов (3 варианта), номер правильного ответа.
+//По каждой теме 3 вопроса. 
+//Операции:
+//1)	Заполнить запись по одному вопросу с клавиатуры.
+//2)	Вставить запись в таблицу, упорядочивая по номеру темы (сортировку не использовать).
+//3)	Сформировать тест, включая в него по два вопроса из каждой темы, выбранных случайно.
+//4)	Удалить вопросы по одной теме.
+
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <cstdlib>
+#include <windows.h> 
+using namespace std;
+
+struct var_ans {
+	unsigned short num_ans;
+	string text_ans;
+};
+
+struct Question { 
+	unsigned short number_topic;
+	string question;
+	unsigned short mark;
+	var_ans var_answers_1;
+	var_ans var_answers_2;
+	var_ans var_answers_3;
+	unsigned short cor_answer;
+};
+
+struct Table {
+	int n;
+	Question table[50];
+	Table(int n) {
+		this->n = n;
+	}
+};
+
+void CreateQue(Question& newQuestion) {
+	cout << "Введите номер темы:\n";
+	cin >> newQuestion.number_topic;
+	cout << "Введите текст вопроса:\n";
+	cin.ignore();
+	getline(cin, newQuestion.question);
+	cout << "Введите балл за правильный ответ:\n";
+	cin >> newQuestion.mark;
+	cout << "Введите список вариантов ответов (номер варианта ответа и текст варианта ответа):\n";
+	cin >> newQuestion.var_answers_1.num_ans;
+	cin.ignore();
+	getline(cin, newQuestion.var_answers_1.text_ans);
+	cin >> newQuestion.var_answers_2.num_ans;
+	cin.ignore();
+	getline(cin, newQuestion.var_answers_2.text_ans);
+	cin >> newQuestion.var_answers_3.num_ans;
+	cin.ignore();
+	getline(cin, newQuestion.var_answers_3.text_ans);
+	cout << "Введите номер правильного ответа:\n";
+	cin >> newQuestion.cor_answer;
+}
+
+void InsertТable(Table* ob) {
+	Question q;
+	bool f = false;
+	int count = 0;
+	for (int i = 0; i < ob->n; i++) {
+		CreateQue(q);
+		for (int j = 0; j < count; j++) {
+			if (q.number_topic == ob->table[j].number_topic) {
+				for (int k = count; k >= j; k--) ob->table[k + 1] = ob->table[k];
+				ob->table[j] = q;
+				count++;
+				f = true;
+				break;
+			}
+		}
+		if (!f) {
+			ob->table[count] = q;
+			count++;
+		}
+		f = false;
+	}
+}
+
+void Test(Table* ob) {
+	int count_que = 0;
+	int tmp, r = 0, random = 0;
+	srand(time(NULL));
+	for (int i = 0; i < ob->n; i++) {
+		for (int j = 0; j < ob->n; j++) {
+			if (ob->table[j].number_topic == i + 1 && count_que < 2) {
+				tmp = j;
+				if (r < 2) {
+					j = rand() % 3 + random;
+					r++;
+				}
+				else {
+					random += 3;
+					j = rand() % 3 + random;
+					r = 0;
+					r++;
+				}
+
+				cout << "Тема " << ob->table[tmp].number_topic << ". " << ob->table[j].question << endl;
+				cout << "      " << ob->table[j].var_answers_1.num_ans << ". " << ob->table[j].var_answers_1.text_ans << endl;
+				cout << "      " << ob->table[j].var_answers_2.num_ans << ". " << ob->table[j].var_answers_2.text_ans << endl;
+				cout << "      " << ob->table[j].var_answers_3.num_ans << ". " << ob->table[j].var_answers_3.text_ans << endl;
+				j = tmp;
+				count_que++;
+			}
+		}
+		count_que = 0;
+	}
+}
+
+void DeleteQue(Table* ob, unsigned short num_top) {
+	for (int i = 0; i < ob->n; i++) {
+		if (ob->table[i].number_topic == num_top) {
+			for (int j = i; j < ob->n; j++) {
+				ob->table[j] = ob->table[j + 1];
+			}
+			i--;
+			ob->n--;
+		}
+	}
+}
+
+void PrintTable(Table* ob) {
+	for (int i = 0; i < ob->n; i++) {
+		cout << "Тема " << ob->table[i].number_topic << ". " << ob->table[i].question << endl;
+		cout << "      " << ob->table[i].var_answers_1.num_ans << ". " << ob->table[i].var_answers_1.text_ans << endl;
+		cout << "      " << ob->table[i].var_answers_2.num_ans << ". " << ob->table[i].var_answers_2.text_ans << endl;
+		cout << "      " << ob->table[i].var_answers_3.num_ans << ". " << ob->table[i].var_answers_3.text_ans << endl;
+	}
+}
+
+void menu();void menu() {
+	cout << endl << "Введите 1, чтобы вставить запись в таблицу.\n";
+	cout << "Введите 2, чтобы сформировать тест, где будет по два вопроса из каждой темы, выбранных случайно.\n";
+	cout << "Введите 3, чтобы удалить вопросы по одной теме.\n";
+	cout << "Введите 0, чтобы завершить работу программы.\n";
+}
+
+void Output(Table* ob) {
+	cout << "Введите все тестовые вопросы\n";
+	InsertТable(ob);
+	cout << "Ваши вопросы\n";
+	PrintTable(ob);
+}
+
+int main() {
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	setlocale(LC_CTYPE, "Rus");
+	cout << "Практическая работа №4 студента ИКБО-03-21 Стрелкова А.А. Вариант 29" << endl;
+	cout << "Задание 1 - Структура на основе статического массива" << endl;
+
+	short n, num_top, ind = -1;
+	cout << "Введите колчество всех вопросов" << endl;
+	cin >> n;
+	Table* object = new Table(n);
+
+	while (ind != 0) {
+		menu();
+		cin >> ind;
+		switch (ind) {
+		case 1:
+			Output(object);
+			break;
+		case 2:
+			Output(object);
+			cout << "Тест" << endl;
+			Test(object);
+			break;
+		case 3:
+			Output(object);
+			cout << "Введите тему вопроса, по которой нужно удалить вопросы: ";
+			cin >> num_top;
+			DeleteQue(object, num_top);
+			cout << "Результат" << endl;
+			PrintTable(object);
+			break;
+		}
+	}
+	return 0;
+}
