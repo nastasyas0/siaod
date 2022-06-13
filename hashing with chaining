@@ -1,0 +1,104 @@
+//Алгоритм поиска с применением цепного хеширования
+//Структура записи: счет в банке: Номер счета - 7 разрядное число; ФИО; Адрес
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <list>
+using namespace std;
+
+struct BankAccount {
+    int number;  // Номер счета - 7 разрядное число
+    string fio;  // ФИО
+    string adr;  //  Адрес
+
+	BankAccount(int number, string fio, string adr) {
+		this->number = number;
+		this->fio = fio;
+		this->adr = adr;
+	}
+};
+
+// Поиск с применением цепного хеширования
+class Hash {
+private:
+    int size;
+    vector<list<BankAccount>>* accounts;
+    int hashFunc(int key);  // хеш-функция для сопоставления значений с ключом
+public:
+    Hash(vector<BankAccount> cities);
+    void insertItem(BankAccount city);  // вставляем ключ в хеш-таблицу
+    BankAccount searchItem(int key);
+};
+
+int Hash::hashFunc(int key) {
+    return key % this->size;
+}
+
+Hash::Hash(vector<BankAccount> ac) {
+    this->size = ac.size();
+    accounts = new vector<list<BankAccount>>(size);
+    for (auto BankAccount : ac) {
+        this->insertItem(BankAccount);
+    }
+}
+
+void Hash::insertItem(BankAccount ac) {
+    int index = hashFunc(ac.number);
+    accounts->at(index).push_back(ac);
+}
+
+BankAccount Hash::searchItem(int key) {
+    list<BankAccount> AcList = accounts->at(hashFunc(key));
+    for (auto BankAccount : AcList) {
+        if (BankAccount.number == key) {
+            return BankAccount;
+        }
+    }
+    return BankAccount(0, "", "");
+}
+
+void RandAccount(vector<BankAccount>& ac, int n) {
+	vector<int> nums;
+	for (int i = 0; i < n; i++) {
+		nums.push_back(1000000 + rand() % (10000000 - 1000000));
+	}
+
+	vector<string> FIO {
+		"AAA", "BBB", "CCC", "DDD", "EEE", "FFF", "GGG", "HHH", "III", "JJJ", "KKK", "LLL", "MMM", "NNN"
+	};
+
+	vector<string> adres {
+		"Pokryshkin st, 2", "Vernadsky avenue, 86A", "Vernadsky avenue, 84", "Vernadsky avenue, 78", "Academician Anokhin st, 9A"
+	};
+
+	for (int i = 0; i < n; i++) {
+		int index = rand() % nums.size();
+		ac.push_back(BankAccount(nums.at(index), FIO.at(rand() % FIO.size()), adres.at(rand() % adres.size())));
+		nums.erase(nums.begin() + index);
+	}
+}
+
+void PrintAccount(vector<BankAccount>& ac, int n) {
+	for (int i = 0; i < n; i++) {
+		cout << "Номер счета: " << ac[i].number << endl;
+		cout << "ФИО: " << ac[i].fio << endl;
+		cout << "Адрес: " << ac[i].adr << endl;
+	}
+}
+
+int main() {
+	setlocale(LC_CTYPE, "Rus");
+
+	int n = 1000000, key = 1234567;
+	vector<BankAccount> accounts;
+
+	RandAccount(accounts, n);
+	cout << "Номера счётов:" << endl;
+	PrintAccount(accounts, n);
+
+	Hash accounts(ac);
+	BankAccount foundAcc = accounts.searchItem(key);
+
+	return 0;
+}
