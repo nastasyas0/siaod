@@ -1,0 +1,157 @@
+//Даны два однонаправленных списка L1 и L2.
+//1)	Определить, содержит ли список L1 список L2 как подсписок.
+//2)	Сформировать массив номеров элементов списка L2, которые не содержаться в списке L1.
+//3)	Удалить из списка L2 узлы, номера которых сохранены в массиве.  
+//Тип информационной части узла - int
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Node {
+	int data;
+	Node* next;
+};
+
+void AddNode(Node** list, int n) {
+	*list = new Node;
+
+	int el;
+	cin >> el;
+	(*list)->data = el;
+	(*list)->next = NULL;
+
+	Node* end = *list;
+
+	for (int i = 0; i < n - 1; i++) {
+		cin >> el;
+		end->next = new Node;
+		end = end->next;
+		end->data = el;
+		end->next = NULL;
+	}
+}
+
+void PrintList(Node* list) {
+	Node* node = list;
+
+	while (node != NULL) {
+		cout << node->data << endl;
+		node = node->next;
+	}
+}
+
+bool FindList(Node* first, Node* second) {
+	Node* ptr1 = first;
+	Node* ptr2 = second;
+
+	if (first == NULL && second == NULL) return true;
+	if ((first == NULL && second != NULL) || second == NULL) return false;
+
+	while (first != NULL) {
+		ptr1 = first;
+		while (ptr2 != NULL) {
+			if (ptr1 == NULL) return false;
+			else if (ptr2->data == ptr1->data) {
+				ptr2 = ptr2->next;
+				ptr1 = ptr1->next;
+			}
+			else break;
+		}
+
+		if (ptr2 == NULL) return true;
+		ptr2 = second;
+		first = first->next;
+	}
+	return false;
+}
+
+Node* Find(Node* list, int data) {
+	while (list && (list->data != data)) {
+		list = list->next;
+	}
+	return list;
+}
+
+Node* Push(Node** list, int data) {
+	Node* node = new Node;
+	node->data = data;
+	node->next = *list;
+
+	*list = node;
+
+	return *list;
+}
+
+Node* CreateArray(Node* first, Node* second, int n, vector <int>& list) {
+	Node* list_el = NULL;
+	for (int i = 0; i < n; i++) {
+		if (!Find(first, second->data)) {
+			list.push_back(i); // добавление номеров
+			Push(&list_el, second->data); // добавление элементов
+		}
+		second = second->next;
+	}
+	return list_el;
+}
+
+void DeleteNodes(Node*& L2, Node* LEl, int n) {
+	Node** list = &L2;
+
+	for (int i = 0; i < n; i++) {
+		while (*list) {
+			if (!Find(LEl, (*list)->data)) {
+				list = &(*list)->next;
+				continue;
+			}
+
+			Node* node = *list;
+			*list = node->next;
+			delete node;
+		}
+	}
+}
+
+int main() {
+	setlocale(LC_ALL, "Rus");
+
+	int n;
+	Node* L1 = NULL;
+	Node* L2 = NULL;
+	
+	cout << "Введите размер списка L1: ";
+	cin >> n;
+	cout << "Введите элеметы списка L1:" << endl;
+	AddNode(&L1, n);
+
+	cout << "Введите размер списка L2: ";
+	cin >> n;
+	cout << "Введите элеметы списка L2:" << endl;
+	AddNode(&L2, n);
+
+	cout << "Список L1:" << endl;
+	PrintList(L1);
+	cout << endl;
+	cout << "Список L2:" << endl;
+	PrintList(L2);
+	cout << endl;
+
+	FindList(L1, L2) ? cout << "Список L1 содержит L2 как подсписок" : cout << "Список L1 НЕ содержит L2 как подсписок";
+	cout << endl << endl;
+
+	if (FindList(L1, L2)) {
+		cout << "В списке L2 нет элементов, которые не содержатся в списке L1" << endl << endl;
+		cout << "Список L2 не изменен после удаления узлов" << endl;
+	}
+	else {
+		cout << "Массив L из номеров элементов списка L2, которые не содержатся в списке L1:" << endl;
+		vector <int> L;
+		Node* LEl = CreateArray(L1, L2, n, L);
+		for (int i = 0; i < L.size(); i++) cout << L[i] << endl;
+
+		cout << "Список L2 после удаления узлов, номера которых находятся в массиве L:" << endl;
+		DeleteNodes(L2, LEl, n);
+		PrintList(L2);
+	}
+	return 0;
+}
