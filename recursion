@@ -1,0 +1,65 @@
+//Дан линейный однонаправленный список.
+//Сформировать новый список из нечетных значений исходного.
+//Порядок следования значений в узлах нового списка соответствует порядку следования значений в исходном списке.
+
+#include <iostream>
+using namespace std;
+
+struct Node {
+	int data;
+	Node* next;
+};
+
+void AddNode(Node** list, int n) { 
+	if (n > 0) {
+		(*list) = new Node;
+		cin >> (*list)->data;
+		(*list)->next = NULL;
+		AddNode(&((*list)->next), n - 1);
+	}
+	return;
+}
+
+void PrintList(Node* list) { 
+	Node* node = list;
+	if (node) {
+		cout << node->data << endl;
+		PrintList(node->next);
+	}
+	return;
+}
+
+Node* CreateArray(Node* list) { 
+	Node* list_el = NULL;
+	if (list == NULL) return NULL;
+	if (list->data % 2 != 0) {
+		list_el = new Node;
+		list_el->data = list->data;
+		list_el->next = CreateArray(list->next);
+	}
+	else return CreateArray(list->next);
+	return list_el;
+}
+
+int main() {
+	setlocale(LC_ALL, "Rus");
+
+	int n;
+	Node* L = NULL;
+
+	cout << "Введите размер списка: ";
+	cin >> n;
+	cout << "Введите элеметы списка:" << endl;
+	AddNode(&L, n);
+
+	cout << "Ваш список:" << endl;
+	PrintList(L);
+	cout << endl;
+
+	Node* L1 = CreateArray(L);
+	if (L1 == NULL) cout << "Новый список из нечетных значений исходного списка ПУСТ" << endl << "В исходном списке нет нечетных значений" << endl;
+	else cout << "Новый список из нечетных значений исходного списка:" << endl;
+	PrintList(L1);
+  
+	return 0;
+}
