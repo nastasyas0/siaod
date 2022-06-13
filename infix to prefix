@@ -1,0 +1,129 @@
+//Дано арифметическое выражение в инфиксной форме.
+//Преобразовать выражение в префиксную форму.
+//Стек реализовать на основе массива
+
+#include <iostream>
+#include <string>   
+using namespace std;
+
+template<typename T>
+struct Stack {
+	T* mas = nullptr;
+	int n = 0;
+};
+
+template<typename T>
+void push(Stack<T>& s, T data) {
+	if (s.n == 0) {
+		s.mas = new T[++s.n];
+		s.mas[0] = data;
+		return; 
+	}
+	T* temp = new T[++s.n];
+	for (int i = 0; i < s.n - 1; i++) temp[i] = s.mas[i];
+	temp[s.n - 1] = data;
+	delete[] s.mas;
+	s.mas = temp;
+}
+
+template<typename T>
+T pop(Stack<T>& s) {
+	T res = s.mas[--s.n];
+	if (s.n == 0) {
+		delete[] s.mas;
+		return res;
+	}
+	T* temp = new T[s.n];
+	for (int i = 0; i < s.n; i++) temp[i] = s.mas[i];
+	delete[] s.mas;
+	s.mas = temp;
+	return res;
+}
+
+template<typename T>
+T top(Stack<T> s) {
+	return s.mas[s.n - 1];
+}
+
+template<typename T>
+bool empty(Stack<T> s) {
+	return (s.n == 0 || s.mas == nullptr) ? true : false;
+}
+
+short Priority(char c) {
+	if (c == '+' || c == '-') return 1;
+	if (c == '*' || c == '/') return 2;
+	if (c == '^') return 3;
+	return 0;
+}
+
+string InfixToPostfix(string infix) {
+	string str;
+	Stack<char> st;
+	for (int i = 0; i < infix.size(); i++) {
+		if (isalnum(infix[i])) {  // является ли символ infix[i] буквой или цифрой, те операндом
+			str.push_back(infix[i]);  // если символ является операндом, добавить его в вывод
+		}
+		else if (infix[i] == '(') {  // если символ - ‘(‘, вставить его в стек
+			push(st, infix[i]);
+		}
+		else if (infix[i] == ')') {  // если символом является ‘)’, извлечь его и вывести из стека до тех пор, пока не встретится ‘(‘
+			while (!empty(st) && top(st) != '(') {
+				str.push_back(pop(st));
+				if (top(st) == '(') { 
+					pop(st);  // удалить '(' из стека
+					break; 
+				}
+			}
+		}
+		else {  // если оператор найден
+			if (empty(st) || top(st) == '(') push(st, infix[i]);
+			else if (Priority(infix[i]) > Priority(top(st))) { 
+				push(st, infix[i]); 
+			}
+			else {
+				while (!empty(st) && top(st) != '(' && Priority(infix[i]) <= Priority(top(st))) {
+					str.push_back(pop(st));
+				}
+				push(st, infix[i]);  // добавить текущий оператор в стек
+			}
+		}
+	}
+
+	while (!empty(st)) {
+		str.push_back(pop(st));
+	}
+	return str;
+}
+
+string InfixToPrefix(string str) {
+	reverse(str.begin(), str.end());
+
+	// Замена скобок
+	for (int i = 0; i < str.size(); i++) {
+		if (str[i] == '(') {
+			str[i] = ')';
+			i++;
+		}
+		else if (str[i] == ')') {
+			str[i] = '(';
+			i++;
+		}
+	}
+
+	string prefix = InfixToPostfix(str);
+
+	reverse(prefix.begin(), prefix.end());
+	return prefix;
+}
+
+int main() {
+	setlocale(LC_ALL, "Rus");
+
+	string s;
+	cout << "Введите инфиксное выражение:" << endl;
+	cin >> s;
+	cout << "Полученное префиксное выражение: " << InfixToPrefix(s) << endl;
+	
+	return 0;
+}
