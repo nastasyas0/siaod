@@ -1,0 +1,151 @@
+//Разработка тестовых вопросов
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+#include <cstdlib>
+#include <windows.h> 
+using namespace std;
+
+struct var_ans {
+	unsigned short num_ans;
+	string text_ans;
+};
+
+struct Question {
+	unsigned short number_topic;
+	string question;
+	unsigned short mark;
+	var_ans var_answers_1;
+	var_ans var_answers_2;
+	var_ans var_answers_3;
+	unsigned short cor_answer;
+};
+
+struct Table {
+	vector<Question> table;
+};
+
+Question CreateQue() {
+	Question newQuestion;
+	cout << "Введите номер темы:\n";
+	cin >> newQuestion.number_topic;
+	cout << "Введите текст вопроса:\n";
+	cin.ignore();
+	getline(cin, newQuestion.question);
+	cout << "Введите балл за правильный ответ:\n";
+	cin >> newQuestion.mark;
+	cout << "Введите список вариантов ответов (номер варианта ответа и текст варианта ответа):\n";
+	cin >> newQuestion.var_answers_1.num_ans;
+	cin.ignore();
+	getline(cin, newQuestion.var_answers_1.text_ans);
+	cin >> newQuestion.var_answers_2.num_ans;
+	cin.ignore();
+	getline(cin, newQuestion.var_answers_2.text_ans);
+	cin >> newQuestion.var_answers_3.num_ans;
+	cin.ignore();
+	getline(cin, newQuestion.var_answers_3.text_ans);
+	cout << "Введите номер правильного ответа:\n";
+	cin >> newQuestion.cor_answer;
+
+	return newQuestion;
+}
+
+void InsertТable(Table& ob, Question q) {
+	for (int i = 0; i < ob.table.size(); i++) {
+		if (q.number_topic == ob.table[i].number_topic) {
+			ob.table.insert(ob.table.begin() + i, q);
+			return;
+		}
+	}
+	ob.table.push_back(q);
+}
+
+void Test(Table& ob) {
+	int count_que = 0;
+	int tmp, r = 0, random = 0;
+	srand(time(NULL));
+	for (int i = 0; i < ob.table.size(); i++) {
+		for (int j = 0; j < ob.table.size(); j++) {
+			if (ob.table[j].number_topic == i + 1 && count_que < 2) {
+				tmp = j;
+				if (r < 2) {
+					j = rand() % 3 + random;
+					r++;
+				}
+				else {
+					random += 3;
+					j = rand() % 3 + random;
+					r = 0;
+					r++;
+				}
+
+				cout << "Тема " << ob.table[tmp].number_topic << ". " << ob.table[j].question << endl;
+				cout << "      " << ob.table[j].var_answers_1.num_ans << ". " << ob.table[j].var_answers_1.text_ans << endl;
+				cout << "      " << ob.table[j].var_answers_2.num_ans << ". " << ob.table[j].var_answers_2.text_ans << endl;
+				cout << "      " << ob.table[j].var_answers_3.num_ans << ". " << ob.table[j].var_answers_3.text_ans << endl;
+				j = tmp;
+				count_que++;
+			}
+		}
+		count_que = 0;
+	}
+}
+
+void DeleteQue(Table& ob, unsigned short num_top) {
+	for (int i = 0; i < ob.table.size(); i++) {
+		if (ob.table[i].number_topic == num_top) {
+			ob.table.erase(ob.table.begin() + i);
+			i--;
+		}
+	}
+}
+
+void PrintTable(Table& ob) {
+	for (int i = 0; i < ob.table.size(); i++) {
+		cout << "Тема " << ob.table[i].number_topic << ". " << ob.table[i].question << endl;
+		cout << "      " << ob.table[i].var_answers_1.num_ans << ". " << ob.table[i].var_answers_1.text_ans << endl;
+		cout << "      " << ob.table[i].var_answers_2.num_ans << ". " << ob.table[i].var_answers_2.text_ans << endl;
+		cout << "      " << ob.table[i].var_answers_3.num_ans << ". " << ob.table[i].var_answers_3.text_ans << endl;
+	}
+}
+
+void menu() {
+	cout << endl << "Введите 1, чтобы вставить запись в таблицу.\n";
+	cout << "Введите 2, чтобы сформировать тест, где будет по два вопроса из каждой темы, выбранных случайно.\n";
+	cout << "Введите 3, чтобы удалить вопросы по одной теме.\n";
+	cout << "Введите 0, чтобы завершить работу программы.\n";
+}
+
+int main() {
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	setlocale(LC_CTYPE, "Rus");
+	short num_top, ind = -1;
+	Table object;
+
+	while (ind != 0) {
+		menu();
+		cin >> ind;
+		switch (ind) {
+		case 1:
+			InsertТable(object, CreateQue());
+			cout << "Ваши вопросы:" << endl;
+			PrintTable(object);
+			break;
+		case 2:
+			cout << "Тест:" << endl;
+			Test(object);
+			break;
+		case 3:
+			cout << "Введите тему вопроса, по которой нужно удалить вопросы: ";
+			cin >> num_top;
+			DeleteQue(object, num_top);
+			cout << "Результат:" << endl;
+			PrintTable(object);
+			break;
+		}
+	}
+	return 0;
+}
